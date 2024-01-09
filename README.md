@@ -21,4 +21,20 @@ Create domain driven project structure
 #### 2.1.3 Production Requirenents Template/Draft
 - Example: [backend/container/production](https://github.com/eugen-hoppe/cicd_v1/blob/7a3e033a81290abeb7314b84c549bd5adaada981/backend/container/production/requirements.txt)
 
+### 2.2 Local Environment Setup (Python)
 
+```shell
+python3 -m venv .venv
+```
+
+```shell
+source .venv/bin/activate
+```
+
+```shell
+pip install -r backend/container/requirements.txt
+```
+
+```shell
+pip install -r backend/container/development/requirements.txt
+```
