@@ -73,6 +73,8 @@ python backend.py
 - add public key to server
 #### 4.1.2 Create GitHub Actions Secrets
 
+##### 4.1.2.1 Pipeline Secrets
+
 ```txt
 DDCS_DOCKER_USER
 ```
@@ -97,14 +99,22 @@ DDCS_SERVER_SSH_KEY
 DDCS_SERVER_SSH_PASSPHRASE
 ```
 
-## Create Application Secrets
+###### 4.1.2.1.1 Job Variables
 
-### Config Env Vars
+```txt
+DDCS_SERVICE_ENV_EP_APP_1_IMAGE
+```
+
+> Example format: '???/???:latest'
+
+##### 4.1.2.2 Application Secrets
+
+###### 4.1.2.2.1 Multiple Variables as Single Secret
 
 ```txt
 DDCS_SERVICE_ENV_CONFIG
 ```
-#### Config Env Vars / Template
+###### 4.1.2.2.2 Template for DDCS_SERVICE_ENV_CONFIG
 
 ```txt
 EP_DC_YML='entrypoint/https/'
@@ -119,7 +129,7 @@ EP_APP_1_DB_NAME='postgres'
 EP_APP_1_DB_USER='postgres'
 ```
 
-### Secrete Env Vars
+###### 4.1.2.2.3 Single Sensitive Application Secrets
 
 ```txt
 DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD
@@ -127,9 +137,4 @@ DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD
 
 ```txt
 DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH
-```
-
-example format: '???/???:latest'
-```txt
-DDCS_SERVICE_ENV_EP_APP_1_IMAGE
 ```
