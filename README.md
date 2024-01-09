@@ -38,3 +38,17 @@ pip install -r backend/container/requirements.txt
 ```shell
 pip install -r backend/container/development/requirements.txt
 ```
+
+### 2.3 Add your App to Project Structure
+
+[Example App](https://github.com/eugen-hoppe/cicd_v1/commit/a438b6a17e3a9b5314301aad27cd328882019e20)
+
+```shell
+python backend.py
+```
+
+- a. [open browser](http://localhost:8008/docs)
+- b. Create user
+- c. MVC is working?: [check get-request](http://localhost:8008/users/)
+
+
