@@ -52,3 +52,15 @@ python backend.py
 - c. MVC is working?: [check get-request](http://localhost:8008/users/)
 
 
+## 3. Local Docker Compose Deployment
+
+### 3.1 Container Config
+- a. create [docker configuration files](https://github.com/eugen-hoppe/cicd_v1/commit/5d95070d85b6b844b1017fb48d165ea47d160034)
+- b. create `.env` in root folder with this [variables](https://github.com/eugen-hoppe/cicd_v1/blob/5d95070d85b6b844b1017fb48d165ea47d160034/env_templates/local/env.txt)
+- c. run `docker-compose up -d --build`
+- e. open [/users/](http://localhost/users/)
+- f. open [/dashboard/](http://localhost/dashboard/#/)
+- g. enter user:`USERNAME` and pass:`PASSWORD` (see: [create password](https://github.com/eugen-hoppe/cicd_v1/blob/5d95070d85b6b844b1017fb48d165ea47d160034/env_templates/local/env.txt#L11))
+- h. open [/docs](http://localhost/docs)
+- i. open [/redoc](http://localhost/redoc)
+
