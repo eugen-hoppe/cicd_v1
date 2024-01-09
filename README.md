@@ -64,3 +64,13 @@ python backend.py
 - h. open [/docs](http://localhost/docs)
 - i. open [/redoc](http://localhost/redoc)
 
+## 4. Production
+
+### 4.1 Setup server
+#### 4.1.1 Configure SSH
+- create SSH key (see. [SSH Cheet Sheet](https://gist.github.com/eugen-hoppe/ed1af4aecfac6fe0e322905eb4e7052b))
+- with passphrase
+- add public key to server
+#### 4.1.2 Create GitHub Actions Secrets
+- ...
+
