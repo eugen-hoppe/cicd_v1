@@ -148,4 +148,7 @@ Create [cicd.yml](https://github.com/eugen-hoppe/cicd_v1/blob/d009de68a5ebe4dd6d
 #### 4.2.2 Set up jobs
 
 #### 4.2.2.1 Tests
-...
+
+Add [backend/container/workflow/requirements.txt](https://github.com/aiuminet/ddcs/blob/main/backend/container/workflow_tests/requirements.txt)
+Check why [job is failed](https://github.com/eugen-hoppe/cicd_v1/actions/runs/7467832148/job/20322100898)
+
