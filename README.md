@@ -138,3 +138,14 @@ DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD
 ```txt
 DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH
 ```
+
+### 4.2 Configure CICD Workflow
+
+#### 4.2.1 Template
+
+Create [cicd.yml](https://github.com/eugen-hoppe/cicd_v1/blob/d009de68a5ebe4dd6d0d45f5b11d59ba565e5136/.github/workflows/cicd.yml)
+
+#### 4.2.2 Set up jobs
+
+#### 4.2.2.1 Tests
+...
