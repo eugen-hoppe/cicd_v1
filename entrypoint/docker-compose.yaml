@@ -1,0 +1,24 @@
+version: '3'
+
+
+services:
+  entrypoint_proxy:
+    image: traefik:v2.10
+    container_name: "entrypoint_proxy"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=(Host(`${EP_DOMAIN}`)&&PathPrefix(`/dashboard`,`/api`))"
+      - "traefik.http.routers.traefik.entrypoints=${EP_PROTOCOL_LABEL}"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"

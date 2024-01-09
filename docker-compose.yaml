@@ -1,0 +1,39 @@
+version: '3'
+
+
+# app_1: backend
+x-backend_db: &backend_db
+  extends:
+    file: backend/docker-compose.yaml
+    service: backend_db
+
+
+x-backend_web: &backend_web
+  extends:
+    file: backend/docker-compose.yaml
+    service: backend_web
+
+
+# app_2
+# ...
+
+
+# load_balancer: entrypoint
+x-entrypoint_proxy: &entrypoint_proxy
+  extends:
+    file: ${EP_DC_YML}docker-compose.yaml
+    service: entrypoint_proxy
+
+
+services:
+  backend_web:
+    <<: *backend_web # app_1
+
+  backend_db:
+    <<: *backend_db # app_1
+
+  entrypoint_proxy:
+    <<: *entrypoint_proxy # load_balancer
+
+volumes:
+  postgres_data: # app_1

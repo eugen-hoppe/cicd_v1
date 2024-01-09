@@ -1,0 +1,60 @@
+version: '3'
+
+
+services:
+  backend_db:
+    image: postgres
+    container_name: backend_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${EP_APP_1_DB_NAME}
+      POSTGRES_USER: ${EP_APP_1_DB_USER}
+      POSTGRES_PASSWORD: ${DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  backend_web: # ! +++ Never change "# prodSnippet-***"-tags without adapting workflow jobs +++ !
+    # prodSnippet-backend_web-start
+    build:
+      context: .
+      dockerfile: container/Dockerfile
+    # prodSnippet-backend_web-end
+    # prodSnippet-image
+    command: uvicorn backend.api:app --host 0.0.0.0 --port ${EP_APP_1_PORT}
+    environment:
+      POSTGRES_DB: ${EP_APP_1_DB_NAME}
+      POSTGRES_USER: ${EP_APP_1_DB_USER}
+      POSTGRES_PASSWORD: ${DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD}
+    depends_on:
+      backend_db:
+        condition: service_healthy
+    container_name: backend_web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
+      - "traefik.http.services.backend_web.loadbalancer.server.port=${EP_APP_1_PORT}"
+      # Auth-Routes
+      - "traefik.http.routers.backend_web-auth.rule=(Host(`${EP_DOMAIN}`)&&PathPrefix(\
+        `/${EP_APP_1_AUTH_PATH_PREFIX_1}`,\
+        `/${EP_APP_1_AUTH_PATH_PREFIX_2}`,\
+        `/${EP_APP_1_AUTH_PATH_PREFIX_3}`\
+        ))"
+      - "traefik.http.routers.backend_web-auth.entrypoints=${EP_PROTOCOL_LABEL}"
+      - "traefik.http.routers.backend_web-auth.middlewares=traefik-auth"
+      - "traefik.http.routers.backend_web-auth.service=backend_web"
+      # App-Routes
+      - "traefik.http.routers.backend_web-app.rule=(Host(`${EP_DOMAIN}`)&&!PathPrefix(\
+        `/${EP_APP_1_AUTH_PATH_PREFIX_1}`,\
+        `/${EP_APP_1_AUTH_PATH_PREFIX_2}`,\
+        `/${EP_APP_1_AUTH_PATH_PREFIX_3}`,\
+        `/dashboard`,\
+        `/api`\
+        ))"
+      - "traefik.http.routers.backend_web-app.entrypoints=${EP_PROTOCOL_LABEL}"
+      - "traefik.http.routers.backend_web-app.service=backend_web"
+      # prodSnippet-tls-auth- "traefik.http.routers.backend_web-auth.tls.certresolver=myresolver"
+      # prodSnippet-tls-app- "traefik.http.routers.backend_web-app.tls.certresolver=myresolver"
