@@ -1,22 +1,145 @@
-name: CI
+name: DDCS
+
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-  workflow_dispatch:
 
 jobs:
-  build:
-    if: github.ref == 'refs/heads/main_offline'
+  tests_pytest:
+    if: github.ref == 'refs/heads/main_0'
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.11]
     steps:
-      - uses: actions/checkout@v3
-      - name: Run a one-line script
-        run: echo Hello, world!
-      - name: Run a multi-line script
+      - uses: actions/checkout@v4
+      - name: SET UP python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: INSTALL dependencies
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          python -m pip install --upgrade pip
+          pip install -r backend/container/requirements.txt
+          pip install -r backend/container/workflow_tests/requirements.txt
+      - name: Run Tests
+        run: |
+          pytest
+
+  docker_hub_push:
+    if: github.ref == 'refs/heads/main_0'
+    runs-on: ubuntu-latest
+    needs: tests_pytest
+    steps:
+      - name: CHECK OUT repository
+        uses: actions/checkout@v4
+      - name: BUILD docker image
+        uses: docker/setup-buildx-action@v3
+      - name: LOGIN docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DDCS_DOCKER_USER }}
+          password: ${{ secrets.DDCS_DOCKER_PW }}
+      - name: PUSH to docker hub
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          context: ./backend
+          file: ./backend/container/Dockerfile
+          tags: ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
+
+  setup_server:
+    if: github.ref == 'refs/heads/main_0'
+    runs-on: ubuntu-latest
+    needs: docker_hub_push
+    steps:
+      - name: EXECUTE SSH to setup server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DDCS_SERVER_HOST }}
+          username: ${{ secrets.DDCS_SERVER_USER }}
+          key: ${{ secrets.DDCS_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
+          script: |
+            sudo apt-get update
+            cd /${{ secrets.DDCS_SERVER_USER }}
+            if [ ! -f .env ]; then
+                touch .env
+                sudo apt-get upgrade -y
+            fi
+
+  deploy_service: 
+    if: github.ref == 'refs/heads/main_0'
+    runs-on: ubuntu-latest
+    needs: setup_server
+    steps:
+      - name: CHECK OUT repository
+        uses: actions/checkout@v4
+
+      - name: COPY ROOT docker-compose.yaml
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DDCS_SERVER_HOST }}
+          username: ${{ secrets.DDCS_SERVER_USER }}
+          key: ${{ secrets.DDCS_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
+          source: "./docker-compose.yaml"
+          target: "/${{ secrets.DDCS_SERVER_USER }}"
+
+      - name: CHANGE build-tag to image-tag in backend/docker-compose.yaml
+        run: |
+          sed -i '/# prodSnippet-backend_web-start/,/# prodSnippet-backend_web-end/d' ./backend/docker-compose.yaml
+          sed -i 's/# prodSnippet-image/image: \${EP_APP_1_IMAGE}/' ./backend/docker-compose.yaml
+
+      - name: ADD cert-resolver-labels to app in backend/docker-compose.yaml
+        run: |
+          sed -i 's/# prodSnippet-tls-auth-/-/' ./backend/docker-compose.yaml
+          sed -i 's/# prodSnippet-tls-app-/-/' ./backend/docker-compose.yaml
+
+      - name: COPY backend/docker-compose.yaml
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DDCS_SERVER_HOST }}
+          username: ${{ secrets.DDCS_SERVER_USER }}
+          key: ${{ secrets.DDCS_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
+          source: "./backend/docker-compose.yaml"
+          target: "/${{ secrets.DDCS_SERVER_USER }}"
+
+      - name: COPY entrypoint/https/docker-compose.yaml
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DDCS_SERVER_HOST }}
+          username: ${{ secrets.DDCS_SERVER_USER }}
+          key: ${{ secrets.DDCS_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
+          source: "./entrypoint/https/docker-compose.yaml"
+          target: "/${{ secrets.DDCS_SERVER_USER }}"
+
+      - name: EXECUTE SSH to deploy service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DDCS_SERVER_HOST }}
+          username: ${{ secrets.DDCS_SERVER_USER }}
+          key: ${{ secrets.DDCS_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
+          script: |
+            cd /${{ secrets.DDCS_SERVER_USER }}
+            rm .env && touch .env
+            echo -e "${{ secrets.DDCS_SERVICE_ENV_CONFIG }}" >> .env
+            echo DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD='${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD }}' >> .env
+            echo DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH='${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH }}' >> .env
+            cd /${{ secrets.DDCS_SERVER_USER }}
+            sudo echo "${{ secrets.DDCS_DOCKER_PW }}" | docker login --username ${{ secrets.DDCS_DOCKER_USER }} --password-stdin
+            sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
+            cd /${{ secrets.DDCS_SERVER_USER }}
+            if [ ! -f cicd_logs.txt ]; then
+                sudo docker compose up -d --build
+                sudo docker compose logs -f > cicd_logs.txt &
+            fi
+            sudo docker compose stop
+            sudo docker rm backend_web backend_db entrypoint_proxy
+            sudo docker compose up -d --build
+            sudo docker logout
