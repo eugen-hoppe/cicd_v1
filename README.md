@@ -72,5 +72,64 @@ python backend.py
 - with passphrase
 - add public key to server
 #### 4.1.2 Create GitHub Actions Secrets
-- ...
 
+```txt
+DDCS_DOCKER_USER
+```
+
+```txt
+DDCS_DOCKER_PW
+```
+
+```txt
+DDCS_SERVER_USER
+```
+
+```txt
+DDCS_SERVER_HOST
+```
+
+```txt
+DDCS_SERVER_SSH_KEY
+```
+
+```txt
+DDCS_SERVER_SSH_PASSPHRASE
+```
+
+## Create Application Secrets
+
+### Config Env Vars
+
+```txt
+DDCS_SERVICE_ENV_CONFIG
+```
+#### Config Env Vars / Template
+
+```txt
+EP_DC_YML='entrypoint/https/'
+EP_DOMAIN='???'
+EP_LE_EMAIL='???'
+EP_PROTOCOL_LABEL='websecure'
+EP_APP_1_AUTH_PATH_PREFIX_1='docs'
+EP_APP_1_AUTH_PATH_PREFIX_2='redoc'
+EP_APP_1_AUTH_PATH_PREFIX_3='openapi.json'
+EP_APP_1_PORT='8010'
+EP_APP_1_DB_NAME='postgres'
+EP_APP_1_DB_USER='postgres'
+```
+
+### Secrete Env Vars
+
+```txt
+DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD
+```
+
+```txt
+DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH
+```
+
+example format: '???/???:latest'
+```txt
+DDCS_SERVICE_ENV_EP_APP_1_IMAGE
+```
