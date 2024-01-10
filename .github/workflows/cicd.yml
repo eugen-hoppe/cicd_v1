@@ -91,7 +91,7 @@ jobs:
       - name: CHANGE build-tag to image-tag in backend/docker-compose.yaml
         run: |
           sed -i '/# prodSnippet-backend_web-start/,/# prodSnippet-backend_web-end/d' ./backend/docker-compose.yaml
-          sed -i 's/# prodSnippet-image/image: \${EP_APP_1_IMAGE}/' ./backend/docker-compose.yaml
+          sed -i 's/# prodSnippet-image/image: \${DDCS_SERVICE_ENV_EP_APP_1_IMAGE}/' ./backend/docker-compose.yaml
 
       - name: ADD cert-resolver-labels to app in backend/docker-compose.yaml
         run: |
