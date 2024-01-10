@@ -131,7 +131,7 @@ jobs:
             echo -e "${{ secrets.DDCS_SERVICE_ENV_CONFIG }}" >> .env
             echo -e DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD }}" >> .env
             echo -e DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH }}" >> .env
-            echo -e DDCS_SERVICE_ENV_EP_APP_1_IMAGE="${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}" >> .env
+            echo DDCS_SERVICE_ENV_EP_APP_1_IMAGE="'${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}'" >> .env
             cd /${{ secrets.DDCS_SERVER_USER }}
             sudo echo "${{ secrets.DDCS_DOCKER_PW }}" | docker login --username ${{ secrets.DDCS_DOCKER_USER }} --password-stdin
             sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
