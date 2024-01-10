@@ -51,7 +51,7 @@ jobs:
           tags: ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
 
   setup_server:
-    if: github.ref == 'refs/heads/main_0'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: docker_hub_push
     steps:
