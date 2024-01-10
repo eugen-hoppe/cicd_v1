@@ -154,3 +154,8 @@ Create [cicd.yml](https://github.com/eugen-hoppe/cicd_v1/blob/d009de68a5ebe4dd6d
 
 #### 4.2.2.2 Build Docker Image and Push to Docker Hub
 - Add [build & push job](https://github.com/eugen-hoppe/cicd_v1/commit/0da80e43829a9b4b9e705009969ad17904826772)
+
+#### 4.2.2.3 Setup Server 
+- Basicly contains logic about recognition if server is deployed first time
+- If initial workflow indicator found exicute one time SSH comands (for example if `.env`-file is in home folder)
+- Than it can contain maintenance jobs list package list updates etc or security updates.
