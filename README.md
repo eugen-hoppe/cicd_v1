@@ -159,3 +159,6 @@ Create [cicd.yml](https://github.com/eugen-hoppe/cicd_v1/blob/d009de68a5ebe4dd6d
 - Primarily includes logic to determine if the server is being deployed for the first time.
 - If an initial workflow indicator is detected, execute one-time SSH commands (e.g., if a `.env` file is located in the home folder).
 - This section may also encompass a list of maintenance tasks, such as updating package lists, applying security updates, etc.
+
+#### 4.2.2.4 Deploy service
+- ...
