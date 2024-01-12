@@ -80,6 +80,8 @@ jobs:
                 tar -xzf docker-credential-pass-v0.6.3-amd64.tar.gz
                 chmod +x docker-credential-pass
                 sudo mv docker-credential-pass /usr/local/bin/
+
+                echo '{"credsStore":"pass"}' > ~/.docker/config.json
             fi
 
   deploy_service: 
