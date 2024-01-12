@@ -117,7 +117,13 @@ jobs:
           passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
           source: "./entrypoint/https/docker-compose.yaml"
           target: "/${{ secrets.DDCS_SERVER_USER }}"
-
+      
+      - name: LOGIN docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DDCS_DOCKER_USER }}
+          password: ${{ secrets.DDCS_DOCKER_PW }}
+  
       - name: EXECUTE SSH to deploy service
         uses: appleboy/ssh-action@master
         with:
@@ -133,7 +139,6 @@ jobs:
             echo -e DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH }}" >> .env
             echo DDCS_SERVICE_ENV_EP_APP_1_IMAGE="'${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}'" >> .env
             cd /${{ secrets.DDCS_SERVER_USER }}
-            sudo echo "${{ secrets.DDCS_DOCKER_PW }}" | docker login --username ${{ secrets.DDCS_DOCKER_USER }} --password-stdin
             sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
             cd /${{ secrets.DDCS_SERVER_USER }}
             if [ ! -f cicd_logs.txt ]; then
