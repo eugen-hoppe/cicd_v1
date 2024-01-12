@@ -83,8 +83,6 @@ jobs:
 
                 mkdir -p ~/.docker
                 echo '{"credsStore":"pass"}' > ~/.docker/config.json
-
-                sudo reboot
             fi
 
   deploy_service: 
@@ -144,21 +142,28 @@ jobs:
           passphrase: ${{ secrets.DDCS_SERVER_SSH_PASSPHRASE }}
           script: |
             cd /${{ secrets.DDCS_SERVER_USER }}
-            rm .env && touch .env
-            echo -e "${{ secrets.DDCS_SERVICE_ENV_CONFIG }}" >> .env
-            echo -e DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD }}" >> .env
-            echo -e DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH }}" >> .env
-            echo DDCS_SERVICE_ENV_EP_APP_1_IMAGE="'${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}'" >> .env
-            cd /${{ secrets.DDCS_SERVER_USER }}
-            sudo echo "${{ secrets.DDCS_DOCKER_PW }}" | docker login --username ${{ secrets.DDCS_DOCKER_USER }} --password-stdin
-            cd /${{ secrets.DDCS_SERVER_USER }}
-            sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
-            if [ ! -f cicd_logs.txt ]; then
-                sudo docker compose up -d --build
-                sudo docker compose logs -f > cicd_logs.txt &
+            if [ ! -f server_setup_logs.txt ]; then
+                touch server_setup_logs.txt
+                sudo reboot
+            else
+              rm .env && touch .env
+              echo -e "${{ secrets.DDCS_SERVICE_ENV_CONFIG }}" >> .env
+              echo -e DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_APP_1_DB_PASSWORD }}" >> .env
+              echo -e DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH="${{ secrets.DDCS_SERVICE_ENV_SECRET_EP_AUTH_USER_AND_HASH }}" >> .env
+              echo DDCS_SERVICE_ENV_EP_APP_1_IMAGE="'${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}'" >> .env
+              cd /${{ secrets.DDCS_SERVER_USER }}
+              sudo echo "${{ secrets.DDCS_DOCKER_PW }}" | docker login --username ${{ secrets.DDCS_DOCKER_USER }} --password-stdin
+              cd /${{ secrets.DDCS_SERVER_USER }}
+              sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
+              if [ ! -f cicd_logs.txt ]; then
+                  sudo docker compose up -d --build
+                  sudo docker compose logs -f > cicd_logs.txt &
+                  sudo docker logout
+                  sudo reboot
+              fi
+              sudo docker compose stop
+              sudo docker rm backend_web backend_db entrypoint_proxy
+              sudo docker compose up -d --build
+              sudo docker logout
             fi
-            sudo docker compose stop
-            sudo docker rm backend_web backend_db entrypoint_proxy
-            sudo docker compose up -d --build
-            sudo docker logout
 
