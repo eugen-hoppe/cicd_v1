@@ -136,9 +136,7 @@ jobs:
             cd /${{ secrets.DDCS_SERVER_USER }}
             sudo echo "${{ secrets.DDCS_DOCKER_PW }}" | docker login --username ${{ secrets.DDCS_DOCKER_USER }} --password-stdin
             cd /${{ secrets.DDCS_SERVER_USER }}
-            if ! docker image inspect ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }} > /dev/null 2>&1; then
-                sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
-            fi
+            sudo docker pull ${{ secrets.DDCS_SERVICE_ENV_EP_APP_1_IMAGE }}
             if [ ! -f cicd_logs.txt ]; then
                 sudo docker compose up -d --build
                 sudo docker compose logs -f > cicd_logs.txt &
