@@ -68,7 +68,18 @@ jobs:
             if [ ! -f .env ]; then
                 touch .env
                 sudo apt-get upgrade -y
-                sudo apt-get install pass
+
+                sudo apt-get update
+                sudo apt-get install -y pass gnupg2
+    
+                echo -e "%echo Generating a basic OpenPGP key\nKey-Type: default\nSubkey-Type: default\nName-Real: GitHub\nName-Comment: Docker\nName-Email: ${{ secrets.GPG_EMAIL }}\nExpire-Date: 0\nPassphrase: ${{ secrets.GPG_KEY_PASSPHRASE }}\n%commit\n%echo done" | gpg2 --batch --generate-key
+            
+                gpg2 --list-keys --with-colons | grep fpr | head -n 1 | cut -d: -f10 | xargs pass init
+            
+                wget https://github.com/docker/docker-credential-helpers/releases/download/v0.6.3/docker-credential-pass-v0.6.3-amd64.tar.gz
+                tar -xzf docker-credential-pass-v0.6.3-amd64.tar.gz
+                chmod +x docker-credential-pass
+                sudo mv docker-credential-pass /usr/local/bin/
             fi
 
   deploy_service: 
