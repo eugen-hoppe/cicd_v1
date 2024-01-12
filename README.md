@@ -161,6 +161,4 @@ Create [cicd.yml](https://github.com/eugen-hoppe/cicd_v1/blob/d009de68a5ebe4dd6d
 - This section may also encompass a list of maintenance tasks, such as updating package lists, applying security updates, etc.
 
 #### 4.2.2.4 Deploy service
-- Docker Hub pull
-- Build
-- ...
+- Docker Hub pull and deploy
