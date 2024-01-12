@@ -132,7 +132,6 @@ jobs:
             cd /${{ secrets.DDCS_SERVER_USER }}
             if [ ! -f server_setup_logs.txt ]; then
                 touch server_setup_logs.txt
-                sudo reboot
             else
               rm .env && touch .env
               echo -e "${{ secrets.DDCS_SERVICE_ENV_CONFIG }}" >> .env
@@ -154,4 +153,3 @@ jobs:
               sudo docker compose up -d --build
               sudo docker logout
             fi
-
