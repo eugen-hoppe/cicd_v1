@@ -81,7 +81,10 @@ jobs:
                 chmod +x docker-credential-pass
                 sudo mv docker-credential-pass /usr/local/bin/
 
+                mkdir -p ~/.docker
                 echo '{"credsStore":"pass"}' > ~/.docker/config.json
+
+                sudo reboot
             fi
 
   deploy_service: 
