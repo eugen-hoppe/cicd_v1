@@ -132,6 +132,7 @@ jobs:
             cd /${{ secrets.DDCS_SERVER_USER }}
             if [ ! -f server_setup_logs.txt ]; then
                 touch server_setup_logs.txt
+                echo "reboot manuually before rerun this job after server setup"
             else
               rm .env && touch .env
               echo -e "${{ secrets.DDCS_SERVICE_ENV_CONFIG }}" >> .env
